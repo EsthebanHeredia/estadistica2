@@ -1,0 +1,111 @@
+---
+title: "Análisis de Métodos de Clasificación"
+author: "Grupo de Estadística 2"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introducción
+En este estudio se comparan tres métodos de clasificación de frijoles según su eficiencia en términos de tiempo. Se analiza si hay diferencias significativas entre los métodos usando ANOVA y la prueba de LSD.
+
+## Diseño Experimental
+
+- **Factor:** Método de clasificación.
+- **Bloque:** Estudiante.
+- **Niveles del factor:** Método 1, Método 2, Método 3.
+- **Número de bloques:** 5 (uno por cada estudiante).
+- **Diseño de efectos:** Diseño de efectos fijos.
+- **Variable de respuesta:** Tiempo de clasificación (en segundos).
+- **Aleatorización:** Los métodos se asignaron de manera aleatoria a los estudiantes para evitar sesgos.
+
+## Materiales
+
+- Platos desechables pequeños.
+- Frijoles de tres colores diferentes.
+- Cronómetro.
+
+## Planteamiento del Modelo
+
+El modelo de análisis de varianza se expresa como:
+
+\[ Y_{ij} = \mu + \tau_i + \beta_j + \epsilon_{ij} \]
+
+Donde:
+- \( Y_{ij} \) es el tiempo de clasificación.
+- \( \mu \) es la media general.
+- \( \tau_i \) es el efecto del método \( i \).
+- \( \beta_j \) es el efecto del estudiante \( j \).
+- \( \epsilon_{ij} \) es el error aleatorio, con los supuestos: normalidad, media cero, varianza constante e independencia.
+
+## Carga de Datos
+
+```{r}
+library(readxl)
+library(dplyr)
+library(agricolae)
+library(tidyr)
+library(kableExtra)
+
+mydata <- tibble::tibble(
+  Estudiante = c("De Leon", "Gonzalez", "Jorge", "Estheban", "Ariel"),
+  `1` = c(939, 649, 687, 556, 750),
+  `2` = c(688, 642, 581, 500, 856),
+  `3` = c(821, 714, 680, 685, 920)
+)
+
+# Mostrar datos sin ordenar
+mydata %>%
+  kable("latex", caption = "Datos sin ordenar") %>%
+  kable_styling(latex_options = "striped")
+```
+
+## Transformación de Datos
+
+```{r}
+arranged_data <- pivot_longer(mydata, cols = "1":"3", names_to = "Metodo", values_to="Tiempo")
+arranged_data
+```
+
+## Datos ordenados
+
+```{r}
+# Ordenar los datos por Estudiante
+sorted_data <- arranged_data %>%
+  arrange(Estudiante)
+
+# Mostrar datos ordenados
+sorted_data %>%
+  kable("latex", caption = "Datos ordenados por estudiante") %>%
+  kable_styling(latex_options = "striped")
+
+```
+
+
+
+## Prueba de Hipótesis (ANOVA)
+
+```{r}
+results <- aov(Tiempo ~ Metodo + Estudiante, data = arranged_data)
+summary(results)
+```
+
+## Diferencia Significativa de Fisher (LSD)
+
+```{r}
+lsdresults <- LSD.test(results, "Estudiante")
+lsdresults
+```
+
+## Cotización del Estudio
+
+Se estima que el costo del estudio incluye:
+- Materiales: Q30
+- Total: Q30
+
+## Recomendación a Glamour
+
+El análisis ANOVA muestra que hay una diferencia significativa entre los estudiantes (p = 0.0101), pero no entre los métodos de clasificación (p = 0.1186). La prueba LSD indica que Ariel y De Leon tienen tiempos significativamente más altos que los otros estudiantes. Se recomienda a la empresa "Glamour" capacitar a los clasificadores con menor rendimiento o modificar los métodos para mejorar la eficiencia general.
